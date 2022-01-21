@@ -1,0 +1,25 @@
+{
+"Room1": [
+    {
+        "name": "arduino_sensor",
+        "type": "temp",
+        "frequency": 10,
+        "average": 0,
+        "recent_data": 0
+    },
+    {
+        "name": "virtual_sensor1",
+        "type": "presence",
+        "frequency": 10,
+        "average": 0,
+        "recent_data": 0
+    },
+    {
+        "name": "virtual_sensor2",
+        "type": "power",
+        "frequency": 10,
+        "average": 0,
+        "recent_data": 0
+    }
+]
+}
