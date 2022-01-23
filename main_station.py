@@ -1,39 +1,50 @@
 import json
 from flask import Flask, request
+from threading import Lock
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 import time
 
 app = Flask(__name__)
-api = Api(app)
 
-put_args = reqparse.RequestParser()
-put_args.add_argument("Room1", type=list, required=True)
+db_lock = Lock()
 
-class MainStation(Resource):
+with open("main_station_db.json", 'r+') as file:
+    local_mem = json.load(file)
 
-    def get(self, room):
-        # send current info
+@app.route("/post_data/<string:room>", methods=["POST"])
+def post_data(room):
+    json_data = request.get_json()
 
-        return 200
+    with db_lock:
+        with open("main_station_db.json", 'r+') as file:
+            database = json.load(file)
+            database[room] = json_data
+            file.seek(0)
+            json.dump(database, file, indent=4)
+            file.close()
+    return 'done!',200
 
-    def put(self, room):
-        # an aggregate put info into general db.
+info = {'test': 23}
+@app.route("/rooms/<string:room>", methods=["GET"])
+def send_info(room):
+    database = {}
+    return_data = {}
+    with db_lock:
+        with open("main_station_db.json", 'r+') as file:
+            database = json.load(file)
 
-        #args = put_args.parse_args()
-        args = request.json
-        #json_data = request.get_json(force=True)
-        print(room, '\n')
-        print(args)
-        
-        #videos[video_id] = args
-        return 200
+    for r, r_db in database.items():
+        if r == room:
+            for sensor in r_db:
+                name = sensor['name']
+                return_data[name] = sensor
+                del return_data[name]['name']
+                del return_data[name]['recent_data']
+            break
 
-api.add_resource(MainStation, "/<string:room>")
+    return return_data, 200
+
 
 if __name__ == "__main__":
 	
 	app.run(debug=True)
-
-
-
-	#database()
